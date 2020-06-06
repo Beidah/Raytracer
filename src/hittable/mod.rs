@@ -19,6 +19,8 @@ pub struct HitRecord {
     pub normal: Vec3,
     pub mat_ptr: Rc<dyn Material>,
     pub t: f64,
+    pub u: f64,
+    pub v: f64,
     pub front_face: bool,
 }
 
@@ -26,6 +28,8 @@ impl HitRecord {
     pub fn new(
         p: Vec3,
         t: f64,
+        u: f64,
+        v: f64,
         outward_normal: Vec3,
         mat_ptr: &Rc<dyn Material>,
         ray: &Ray,
@@ -38,8 +42,8 @@ impl HitRecord {
         };
 
         HitRecord {
-            p,
-            t,
+            p, t,
+            u, v,
             normal,
             front_face,
             mat_ptr: Rc::clone(mat_ptr),

@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{f64::consts::PI, rc::Rc};
 
 use super::{aabb::Aabb, HitRecord, Hittable};
 use crate::vec3::Vec3;
@@ -16,7 +16,7 @@ impl Sphere {
         Sphere {
             center,
             radius,
-            mat_ptr: Rc::clone(&mat_ptr),
+            mat_ptr,
         }
     }
 }
@@ -37,7 +37,8 @@ impl Hittable for Sphere {
                 let t = temp;
                 let p = ray.at(t);
                 let normal = (p - self.center) / self.radius;
-                let record = HitRecord::new(p, t, normal, &self.mat_ptr, &ray);
+                let (u, v) = get_sphere_uv(&normal);
+                let record = HitRecord::new(p, t, u, v, normal, &self.mat_ptr, &ray);
 
                 return Some(record);
             }
@@ -47,7 +48,8 @@ impl Hittable for Sphere {
                 let t = temp;
                 let p = ray.at(t);
                 let normal = (p - self.center) / self.radius;
-                let record = HitRecord::new(p, t, normal, &self.mat_ptr, &ray);
+                let (u, v) = get_sphere_uv(&normal);
+                let record = HitRecord::new(p, t, u, v, normal, &self.mat_ptr, &ray);
 
                 return Some(record);
             }
@@ -63,4 +65,12 @@ impl Hittable for Sphere {
         );
         Some(output_box)
     }
+}
+
+pub fn get_sphere_uv(p: &Vec3) -> (f64, f64) {
+    let phi = f64::atan2(p.z(), p.x());
+    let theta = f64::asin(p.y());
+    let u = 1.0 - (phi + PI) / (2.0 * PI);
+    let v = (theta + PI / 2.0) / PI;
+    (u, v)
 }

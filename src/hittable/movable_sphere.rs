@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use super::{aabb::Aabb, HitRecord, Hittable};
+use super::{aabb::Aabb, HitRecord, Hittable, sphere::get_sphere_uv};
 use crate::vec3::Vec3;
 use crate::{material::Material, ray::Ray};
 
@@ -54,7 +54,8 @@ impl Hittable for MovableSphere {
                 let t = temp;
                 let p = ray.at(t);
                 let normal = (p - self.center(ray.time())) / self.radius;
-                let record = HitRecord::new(p, t, normal, &self.mat_ptr, &ray);
+                let (u, v) = get_sphere_uv(&normal);
+                let record = HitRecord::new(p, t, u, v, normal, &self.mat_ptr, &ray);
 
                 return Some(record);
             }
@@ -64,7 +65,8 @@ impl Hittable for MovableSphere {
                 let t = temp;
                 let p = ray.at(t);
                 let normal = (p - self.center(ray.time())) / self.radius;
-                let record = HitRecord::new(p, t, normal, &self.mat_ptr, &ray);
+                let (u, v) = get_sphere_uv(&normal);
+                let record = HitRecord::new(p, t, u, v, normal, &self.mat_ptr, &ray);
 
                 return Some(record);
             }

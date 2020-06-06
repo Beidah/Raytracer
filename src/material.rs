@@ -1,8 +1,9 @@
+use std::rc::Rc;
+
 use crate::hittable::HitRecord;
 use crate::ray::Ray;
 use crate::vec3::{refract, Vec3};
-
-use crate::clamp;
+use crate::{texture::{SolidColor, Texture, CheckerTexture}, clamp};
 
 fn schlick(cosine: f64, ref_ind: f64) -> f64 {
     let r0 = (1.0 - ref_ind) / (1.0 + ref_ind);
@@ -21,11 +22,11 @@ pub trait Material {
 }
 
 pub struct Lambertian {
-    pub albedo: Vec3,
+    pub albedo: Rc<dyn Texture>,
 }
 
 impl Lambertian {
-    pub fn new(albedo: Vec3) -> Self {
+    pub fn new(albedo: Rc<dyn Texture>) -> Self {
         Lambertian { albedo }
     }
 }
@@ -40,9 +41,35 @@ impl Material for Lambertian {
     ) -> bool {
         let scatter_direction = record.normal + Vec3::rand_unit_vector();
         *scattered = Ray::new(record.p, scatter_direction, ray_in.time());
-        *attenuation = self.albedo;
+        *attenuation = self.albedo.value(record.u, record.v, record.p);
         true
     }
+}
+
+impl From<(f64, f64, f64)> for Lambertian {
+    fn from((x, y, z): (f64, f64, f64)) -> Self {
+        let color = Vec3::new(x, y, z);
+        let texture = SolidColor::new(color);
+        Self {
+            albedo: Rc::new(texture)
+        }
+    }
+}
+
+impl From<Vec3> for Lambertian {
+    fn from(color: Vec3) -> Self {
+        Self::from((color.x(), color.y(), color.z()))
+    }
+}
+
+impl From<(Vec3, Vec3)> for Lambertian {
+    fn from((color1, color2): (Vec3, Vec3)) -> Self {
+        let texture = CheckerTexture::new(color1, color2);
+        Self {
+            albedo: Rc::new(texture)
+        }
+    }
+    
 }
 
 pub struct Metal {

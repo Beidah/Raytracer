@@ -12,6 +12,7 @@ pub mod hittable;
 pub mod material;
 pub mod ray;
 pub mod vec3;
+pub mod texture;
 
 pub fn degrees_to_radians(degrees: f64) -> f64 {
     degrees * PI / 180.0
@@ -40,9 +41,11 @@ pub fn clamp(x: f64, min: f64, max: f64) -> f64 {
 pub fn random_scene() -> HittableList {
     let mut scene: HittableList = Vec::new();
 
-    let ground_material = Rc::new(Lambertian {
-        albedo: Vec3::new(0.5, 0.5, 0.5),
-    });
+    let ground_material = Rc::new(Lambertian::from((
+        Vec3::new(0.2, 0.3, 0.1),
+        Vec3::new(0.9, 0.9, 0.9)
+    )));
+
     scene.push(Rc::new(Sphere::new(
         Vec3::new(0.0, -1000.0, 0.0),
         1000.0,
@@ -61,7 +64,7 @@ pub fn random_scene() -> HittableList {
             if (center - Vec3::new(4.0, 0.2, 0.0)).length() > 0.9 {
                 if choose_mat < 0.75 {
                     let albedo = Vec3::random() * Vec3::random();
-                    let mat_ptr = Rc::new(Lambertian { albedo });
+                    let mat_ptr = Rc::new(Lambertian::from(albedo));
                     scene.push(Rc::new(Sphere::new(center, 0.2, mat_ptr)));
                 // } else  if choose_mat < 0.8 {
                 //     let albedo = Vec3::random() * Vec3::random();
@@ -82,9 +85,10 @@ pub fn random_scene() -> HittableList {
     }
 
     let mat_ptr = Rc::new(Dielectric::new(1.5));
-    scene.push(Rc::new(Sphere::new(Vec3::new(0.0, 1.0, 0.0), 1.0, mat_ptr)));
+    scene.push(Rc::new(Sphere::new(Vec3::new(0.0, 1.0, 0.0), 1.0, mat_ptr.clone())));
+    scene.push(Rc::new(Sphere::new(Vec3::new(0.0, 1.0, 0.0), -0.6, mat_ptr)));
 
-    let mat_ptr = Rc::new(Lambertian::new(Vec3::new(0.4, 0.2, 0.1)));
+    let mat_ptr = Rc::new(Lambertian::from((0.4, 0.2, 0.1)));
     scene.push(Rc::new(Sphere::new(
         Vec3::new(-4.0, 1.0, 0.0),
         1.0,

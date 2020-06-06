@@ -3,6 +3,8 @@ use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssi
 
 use crate::*;
 
+pub type Color = Vec3;
+
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Vec3(f64, f64, f64);
 
