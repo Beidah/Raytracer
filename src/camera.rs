@@ -26,13 +26,23 @@ impl Default for Camera {
             2.0,
             1.0,
             0.0,
-            0.0
+            0.0,
         )
     }
 }
 
 impl Camera {
-    pub fn new(lookfrom: Vec3, lookat: Vec3, vup: Vec3, vfov: f64, aspect_ratio: f64, aperature: f64, focus_dist: f64, time0: f64, time1: f64) -> Self {
+    pub fn new(
+        lookfrom: Vec3,
+        lookat: Vec3,
+        vup: Vec3,
+        vfov: f64,
+        aspect_ratio: f64,
+        aperature: f64,
+        focus_dist: f64,
+        time0: f64,
+        time1: f64,
+    ) -> Self {
         let theta = degrees_to_radians(vfov);
         let h = f64::tan(theta / 2.0);
         let viewport_height = 2.0 * h;
@@ -52,9 +62,12 @@ impl Camera {
             horizontal,
             vertical,
             lower_left_corner,
-            w, u, v,
+            w,
+            u,
+            v,
             lens_radius: aperature / 2.0,
-            time0, time1
+            time0,
+            time1,
         }
     }
 

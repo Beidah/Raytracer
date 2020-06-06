@@ -62,6 +62,15 @@ impl Vec3 {
         self.2
     }
 
+    pub fn get(&self, index: usize) -> f64 {
+        match index {
+            0 => self.0,
+            1 => self.1,
+            2 => self.2,
+            _ => panic!("Index out of bounds."),
+        }
+    }
+
     pub fn length(&self) -> f64 {
         self.length_squared().sqrt()
     }

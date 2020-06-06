@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use super::{HitRecord, Hittable};
+use super::{aabb::Aabb, HitRecord, Hittable};
 use crate::vec3::Vec3;
 use crate::{material::Material, ray::Ray};
 
@@ -10,20 +10,31 @@ pub struct MovableSphere {
     time0: f64,
     time1: f64,
     radius: f64,
-    mat_ptr: Rc<dyn Material>
+    mat_ptr: Rc<dyn Material>,
 }
 
 impl MovableSphere {
-    pub fn new(center0: Vec3, center1: Vec3, time0: f64, time1: f64, radius: f64, mat_ptr: Rc<dyn Material>) -> Self {
+    pub fn new(
+        center0: Vec3,
+        center1: Vec3,
+        time0: f64,
+        time1: f64,
+        radius: f64,
+        mat_ptr: Rc<dyn Material>,
+    ) -> Self {
         MovableSphere {
-            center0, center1,
-            time0, time1, radius,
-            mat_ptr: Rc::clone(&mat_ptr)
+            center0,
+            center1,
+            time0,
+            time1,
+            radius,
+            mat_ptr: Rc::clone(&mat_ptr),
         }
     }
 
     pub fn center(&self, time: f64) -> Vec3 {
-        self.center0 + (time - self.time0) / (self.time1 - self.time0) * (self.center1 - self.center0)
+        self.center0
+            + (time - self.time0) / (self.time1 - self.time0) * (self.center1 - self.center0)
     }
 }
 
@@ -58,7 +69,23 @@ impl Hittable for MovableSphere {
                 return Some(record);
             }
         }
-        
+
         None
+    }
+
+    fn bounding_box(&self, t0: f64, t1: f64) -> Option<Aabb> {
+        let box0 = Aabb::new(
+            self.center(t0) - Vec3::new(self.radius, self.radius, self.radius),
+            self.center(t0) + Vec3::new(self.radius, self.radius, self.radius),
+        );
+
+        let box1 = Aabb::new(
+            self.center(t1) - Vec3::new(self.radius, self.radius, self.radius),
+            self.center(t1) + Vec3::new(self.radius, self.radius, self.radius),
+        );
+
+        let output_box = Aabb::surrounding_box(box0, box1);
+
+        Some(output_box)
     }
 }

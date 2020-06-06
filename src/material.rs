@@ -26,9 +26,7 @@ pub struct Lambertian {
 
 impl Lambertian {
     pub fn new(albedo: Vec3) -> Self {
-        Lambertian {
-            albedo
-        }
+        Lambertian { albedo }
     }
 }
 

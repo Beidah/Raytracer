@@ -1,8 +1,8 @@
-use vec3::Vec3;
+use camera::Camera;
 use hittable::{Hittable, HittableList};
 use ray::Ray;
 use raytracer::*;
-use camera::Camera;
+use vec3::Vec3;
 
 fn write_color(color: Vec3, samples_per_pixel: i32) {
     let mut r = color.x();
@@ -27,12 +27,14 @@ fn ray_color<T: Hittable>(ray: Ray, world: &T, depth: i32) -> Vec3 {
         return Vec3::new(0.0, 0.0, 0.0);
     }
 
-    
-    if let Some(record) =  world.hit(ray, 0.001, f64::MAX) {
+    if let Some(record) = world.hit(ray, 0.001, f64::MAX) {
         let mut scattered = Default::default();
         let mut attenuation = Default::default();
 
-        if record.mat_ptr.scatter(&ray, &record, &mut attenuation, &mut scattered) {
+        if record
+            .mat_ptr
+            .scatter(&ray, &record, &mut attenuation, &mut scattered)
+        {
             return attenuation * ray_color(scattered, world, depth - 1);
         }
     }
@@ -69,7 +71,8 @@ fn main() {
         aspect_ratio,
         aperature,
         focus_dist,
-        0.0, 1.0
+        0.0,
+        1.0,
     );
 
     for j in (0..image_height).rev() {

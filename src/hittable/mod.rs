@@ -4,11 +4,14 @@ use crate::material::Material;
 use crate::ray::Ray;
 use crate::vec3::Vec3;
 
-pub mod sphere;
+pub mod aabb;
+pub mod bvh_node;
 pub mod movable_sphere;
+pub mod sphere;
 
-pub use sphere::Sphere;
+use aabb::Aabb;
 pub use movable_sphere::MovableSphere;
+pub use sphere::Sphere;
 
 #[derive(Clone)]
 pub struct HitRecord {
@@ -20,7 +23,13 @@ pub struct HitRecord {
 }
 
 impl HitRecord {
-    pub fn new(p: Vec3, t: f64, outward_normal: Vec3, mat_ptr: &Rc<dyn Material>, ray: &Ray) -> Self {
+    pub fn new(
+        p: Vec3,
+        t: f64,
+        outward_normal: Vec3,
+        mat_ptr: &Rc<dyn Material>,
+        ray: &Ray,
+    ) -> Self {
         let front_face = Vec3::dot(ray.direction(), outward_normal) < 0.0;
         let normal = if front_face {
             outward_normal
@@ -29,16 +38,18 @@ impl HitRecord {
         };
 
         HitRecord {
-            p, t,
+            p,
+            t,
             normal,
             front_face,
-            mat_ptr: Rc::clone(mat_ptr)
+            mat_ptr: Rc::clone(mat_ptr),
         }
     }
 }
 
 pub trait Hittable {
     fn hit(&self, ray: Ray, min: f64, max: f64) -> Option<HitRecord>;
+    fn bounding_box(&self, t0: f64, t1: f64) -> Option<Aabb>;
 }
 
 pub type HittableList = Vec<Rc<dyn Hittable>>;
@@ -58,5 +69,20 @@ impl Hittable for HittableList {
         }
 
         hit_anything
+    }
+
+    fn bounding_box(&self, t0: f64, t1: f64) -> Option<Aabb> {
+        if self.is_empty() {
+            return None;
+        }
+
+        let mut output_box = self[0].bounding_box(t0, t1)?;
+
+        for object in self.iter().skip(1) {
+            let temp_box = object.bounding_box(t0, t1)?;
+            output_box = Aabb::surrounding_box(output_box, temp_box);
+        }
+
+        Some(output_box)
     }
 }

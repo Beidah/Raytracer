@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use super::{HitRecord, Hittable};
+use super::{aabb::Aabb, HitRecord, Hittable};
 use crate::vec3::Vec3;
 use crate::{material::Material, ray::Ray};
 
@@ -52,7 +52,15 @@ impl Hittable for Sphere {
                 return Some(record);
             }
         }
-        
+
         None
+    }
+
+    fn bounding_box(&self, _t0: f64, _t1: f64) -> Option<Aabb> {
+        let output_box = Aabb::new(
+            self.center - Vec3::new(self.radius, self.radius, self.radius),
+            self.center + Vec3::new(self.radius, self.radius, self.radius),
+        );
+        Some(output_box)
     }
 }
