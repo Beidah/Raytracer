@@ -35,13 +35,13 @@ impl Lambertian {
 impl Material for Lambertian {
     fn scatter(
         &self,
-        _ray_in: &Ray,
+        ray_in: &Ray,
         record: &HitRecord,
         attenuation: &mut Vec3,
         scattered: &mut Ray,
     ) -> bool {
         let scatter_direction = record.normal + Vec3::rand_unit_vector();
-        *scattered = Ray::new(record.p, scatter_direction);
+        *scattered = Ray::new(record.p, scatter_direction, ray_in.time());
         *attenuation = self.albedo;
         true
     }
@@ -73,6 +73,7 @@ impl Material for Metal {
         *scattered = Ray::new(
             record.p,
             reflected + self.fuzz * Vec3::rand_in_unit_sphere(),
+            ray_in.time(),
         );
         *attenuation = self.albedo;
         Vec3::dot(scattered.direction(), record.normal) > 0.0
@@ -110,19 +111,19 @@ impl Material for Dielectric {
         let sin_theta = f64::sqrt(1.0 - cos_theta * cos_theta);
         if etai_over_etat * sin_theta > 1.0 {
             let reflected = Vec3::reflect(unit_direction, record.normal);
-            *scattered = Ray::new(record.p, reflected);
+            *scattered = Ray::new(record.p, reflected, ray_in.time());
             return true;
         }
 
         let reflect_prob = schlick(cos_theta, etai_over_etat);
         if crate::random_double() < reflect_prob {
             let reflected = Vec3::reflect(unit_direction, record.normal);
-            *scattered = Ray::new(record.p, reflected);
+            *scattered = Ray::new(record.p, reflected, ray_in.time());
             return true;
         }
 
         let refracted = refract(unit_direction, record.normal, etai_over_etat);
-        *scattered = Ray::new(record.p, refracted);
+        *scattered = Ray::new(record.p, refracted, ray_in.time());
         true
     }
 }

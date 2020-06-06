@@ -5,8 +5,10 @@ use crate::ray::Ray;
 use crate::vec3::Vec3;
 
 pub mod sphere;
+pub mod movable_sphere;
 
 pub use sphere::Sphere;
+pub use movable_sphere::MovableSphere;
 
 #[derive(Clone)]
 pub struct HitRecord {
@@ -18,13 +20,20 @@ pub struct HitRecord {
 }
 
 impl HitRecord {
-    pub fn set_face_normal(&mut self, ray: Ray, outward_normal: Vec3) {
-        self.front_face = Vec3::dot(ray.direction(), outward_normal) < 0.0;
-        self.normal = if self.front_face {
+    pub fn new(p: Vec3, t: f64, outward_normal: Vec3, mat_ptr: &Rc<dyn Material>, ray: &Ray) -> Self {
+        let front_face = Vec3::dot(ray.direction(), outward_normal) < 0.0;
+        let normal = if front_face {
             outward_normal
         } else {
             -outward_normal
         };
+
+        HitRecord {
+            p, t,
+            normal,
+            front_face,
+            mat_ptr: Rc::clone(mat_ptr)
+        }
     }
 }
 

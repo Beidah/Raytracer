@@ -69,6 +69,7 @@ fn main() {
         aspect_ratio,
         aperature,
         focus_dist,
+        0.0, 1.0
     );
 
     for j in (0..image_height).rev() {

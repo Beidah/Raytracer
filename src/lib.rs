@@ -3,8 +3,7 @@ pub use std::f64::consts::PI;
 use rand::prelude::*;
 use std::rc::Rc;
 
-use hittable::HittableList;
-use hittable::Sphere;
+use hittable::{HittableList, Sphere, MovableSphere};
 use material::*;
 use vec3::Vec3;
 
@@ -50,10 +49,15 @@ pub fn random_scene() -> HittableList {
             let center = Vec3::new(a as f64 + 0.9 * random_double(), 0.2, b as f64 + 0.9 * random_double());
 
             if (center - Vec3::new(4.0, 0.2, 0.0)).length() > 0.9 {
-                if choose_mat < 0.8 {
+                if choose_mat < 0.75 {
                     let albedo = Vec3::random() * Vec3::random();
                     let mat_ptr = Rc::new(Lambertian { albedo });
                     scene.push(Rc::new(Sphere::new(center, 0.2, mat_ptr)));
+                } else if choose_mat < 0.8 {
+                    let albedo = Vec3::random() * Vec3::random();
+                    let mat_ptr = Rc::new(Lambertian { albedo });
+                    let center2 = center + Vec3::new(0.0, rand_with_range(0.0, 0.5), 0.0);
+                    scene.push(Rc::new(MovableSphere::new(center, center2, 0.0, 1.0, 0.2, mat_ptr)));
                 } else if choose_mat < 0.95 {
                     let color = Vec3::rand_with_range(0.5, 1.0);
                     let fuzz = rand_with_range(0.0, 0.5);
