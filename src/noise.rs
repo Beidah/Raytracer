@@ -72,17 +72,18 @@ impl Perlin {
         let u = p.x() - p.x().floor();
         let v = p.y() - p.y().floor();
         let w = p.z() - p.z().floor();
-        let i = p.x().floor() as usize;
-        let j = p.y().floor() as usize;
-        let k = p.z().floor() as usize;
+
+        let i = p.x().floor() as isize;
+        let j = p.y().floor() as isize;
+        let k = p.z().floor() as isize;
         let mut c: Vec<Vec<Vec<Vec3>>> = vec![vec![vec![Vec3::default(); 2]; 2]; 2];
 
         for di in 0..2 {
             for dj in 0..2 {
                 for dk in 0..2 {
-                    c[di][dj][dk] = self.rand_vec[self.perm_x[(i + di) & 255]
-                        ^ self.perm_y[(j + dj) & 255]
-                        ^ self.perm_z[(k + dk) & 255]];
+                    c[di][dj][dk] = self.rand_vec[self.perm_x[(i + di as isize) as usize & 255]
+                        ^ self.perm_y[(j + dj as isize) as usize & 255]
+                        ^ self.perm_z[(k + dk as isize) as usize & 255]];
                 }
             }
         }

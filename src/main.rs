@@ -1,10 +1,12 @@
+use std::error::Error;
+
 use camera::Camera;
 use hittable::Hittable;
 use ray::Ray;
 use raytracer::*;
 use vec3::Vec3;
 
-fn write_color(color: Vec3, samples_per_pixel: i32) {
+fn write_color(color: Vec3, samples_per_pixel: i32) -> (u8, u8, u8) {
     let mut r = color.x();
     let mut g = color.y();
     let mut b = color.z();
@@ -14,11 +16,10 @@ fn write_color(color: Vec3, samples_per_pixel: i32) {
     g = (scale * g).sqrt();
     b = (scale * b).sqrt();
 
-    println!(
-        "{} {} {}",
-        (256.0 * clamp(r, 0.0, 0.999)) as i32,
-        (256.0 * clamp(g, 0.0, 0.999)) as i32,
-        (256.0 * clamp(b, 0.0, 0.999)) as i32,
+    (
+        (256.0 * clamp(r, 0.0, 0.999)) as u8,
+        (256.0 * clamp(g, 0.0, 0.999)) as u8,
+        (256.0 * clamp(b, 0.0, 0.999)) as u8,
     )
 }
 
@@ -44,19 +45,15 @@ fn ray_color<T: Hittable>(ray: Ray, world: &T, depth: i32) -> Vec3 {
     (1.0 - t) * Vec3::new(1.0, 1.0, 1.0) + t * Vec3::new(0.5, 0.7, 1.0)
 }
 
-fn main() {
+fn main() -> Result<(), Box<dyn Error>> {
     let aspect_ratio = 16.0 / 9.0;
     let image_width = 1200;
-    let image_height = (image_width as f64 / aspect_ratio) as i32;
+    let image_height = (image_width as f64 / aspect_ratio) as u32;
     let samples_per_pixel = 50;
     let max_depth = 30;
 
-    println!("P3");
-    println!("{} {}", image_width, image_height);
-    println!("255");
-
     // let world: HittableList = random_scene();
-    let world = two_perlin_spheres();
+    let world = random_scene();
 
     let lookfrom = Vec3::new(13.0, 2.0, 3.0);
     let lookat = Vec3::new(0.0, 0.0, 0.0);
@@ -76,20 +73,49 @@ fn main() {
         1.0,
     );
 
-    for j in (0..image_height).rev() {
-        eprintln!("\rScanlines remaining: {} ", j);
-        for i in 0..image_width {
-            let mut pixel_color = Vec3::default();
-            for _ in 0..samples_per_pixel {
-                let u = (i as f64 + random_double()) / (image_width as f64 - 1.0);
-                let v = (j as f64 + random_double()) / (image_height as f64 - 1.0);
+    let image_buffer = image::ImageBuffer::from_fn(image_width, image_height, |x, y| {
+        let mut pixel_color = Vec3::default();
+        for _ in 0..samples_per_pixel {
+            let u = (x as f64 + random_double()) / (image_width as f64 - 1.0);
+            let v = 1.0 - (y as f64 + random_double()) / (image_height as f64 - 1.0);
 
-                let ray = camera.get_ray(u, v);
-                pixel_color += ray_color(ray, &world, max_depth);
-            }
-            write_color(pixel_color, samples_per_pixel);
+            let ray = camera.get_ray(u, v);
+            pixel_color += ray_color(ray, &world, max_depth);
+        }
+        let (r, g, b) = write_color(pixel_color, samples_per_pixel);
+        image::Rgb([r, g, b])
+    });
+    
+    // for j in 0..image_height {
+    //     println!("\rScanlines remaining: {} ", image_height - j);
+    //     for i in 0..image_width {
+    //         let mut pixel_color = Vec3::default();
+    //         for _ in 0..samples_per_pixel {
+    //             let u = (i as f64 + random_double()) / (image_width as f64 - 1.0);
+    //             let v = (j as f64 + random_double()) / (image_height as f64 - 1.0);
+
+    //             let ray = camera.get_ray(u, v);
+    //             pixel_color += ray_color(ray, &world, max_depth);
+    //         }
+    //         let pixel = write_color(pixel_color, samples_per_pixel);
+    //         pixels.push(pixel.0);
+    //         pixels.push(pixel.1);
+    //         pixels.push(pixel.2);
+    //     }
+    // }
+
+    let args: Vec<String> = std::env::args().collect();
+
+    match args.get(1) {
+        Some(path) => {
+            println!("Saving to: {}", path);
+            image_buffer.save(path)?;
+        }
+        None => {
+            println!("Saving to: image.png");
+            image_buffer.save("image.png")?;
         }
     }
 
-    eprintln!("Done!");
+    Ok(())
 }
