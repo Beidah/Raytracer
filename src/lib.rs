@@ -5,14 +5,16 @@ use std::rc::Rc;
 
 use hittable::{bvh_node::BvhNode, HittableList, Sphere};
 use material::*;
+use texture::NoiseTexture;
 use vec3::Vec3;
 
 pub mod camera;
 pub mod hittable;
 pub mod material;
+pub mod noise;
 pub mod ray;
-pub mod vec3;
 pub mod texture;
+pub mod vec3;
 
 pub fn degrees_to_radians(degrees: f64) -> f64 {
     degrees * PI / 180.0
@@ -41,13 +43,10 @@ pub fn clamp(x: f64, min: f64, max: f64) -> f64 {
 pub fn random_scene() -> HittableList {
     let mut scene: HittableList = Vec::new();
 
-    let ground_material = Rc::new(Lambertian::from((
-        Vec3::new(0.2, 0.3, 0.1),
-        Vec3::new(0.9, 0.9, 0.9)
-    )));
+    let ground_material = Rc::new(Lambertian::from((Vec3(0.2, 0.3, 0.1), Vec3(0.9, 0.9, 0.9))));
 
     scene.push(Rc::new(Sphere::new(
-        Vec3::new(0.0, -1000.0, 0.0),
+        Vec3(0.0, -1000.0, 0.0),
         1000.0,
         ground_material,
     )));
@@ -55,13 +54,13 @@ pub fn random_scene() -> HittableList {
     for a in -11..11 {
         for b in -11..11 {
             let choose_mat = random_double();
-            let center = Vec3::new(
+            let center = Vec3(
                 a as f64 + 0.9 * random_double(),
                 0.2,
                 b as f64 + 0.9 * random_double(),
             );
 
-            if (center - Vec3::new(4.0, 0.2, 0.0)).length() > 0.9 {
+            if (center - Vec3(4.0, 0.2, 0.0)).length() > 0.9 {
                 if choose_mat < 0.75 {
                     let albedo = Vec3::random() * Vec3::random();
                     let mat_ptr = Rc::new(Lambertian::from(albedo));
@@ -85,20 +84,35 @@ pub fn random_scene() -> HittableList {
     }
 
     let mat_ptr = Rc::new(Dielectric::new(1.5));
-    scene.push(Rc::new(Sphere::new(Vec3::new(0.0, 1.0, 0.0), 1.0, mat_ptr.clone())));
-    scene.push(Rc::new(Sphere::new(Vec3::new(0.0, 1.0, 0.0), -0.6, mat_ptr)));
+    scene.push(Rc::new(Sphere::new(Vec3(0.0, 1.0, 0.0), 1.0, mat_ptr)));
 
     let mat_ptr = Rc::new(Lambertian::from((0.4, 0.2, 0.1)));
-    scene.push(Rc::new(Sphere::new(
-        Vec3::new(-4.0, 1.0, 0.0),
-        1.0,
-        mat_ptr,
-    )));
+    scene.push(Rc::new(Sphere::new(Vec3(-4.0, 1.0, 0.0), 1.0, mat_ptr)));
 
-    let mat_ptr = Rc::new(Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.0));
-    scene.push(Rc::new(Sphere::new(Vec3::new(4.0, 1.0, 0.0), 1.0, mat_ptr)));
+    let mat_ptr = Rc::new(Metal::new(Vec3(0.7, 0.6, 0.5), 0.0));
+    scene.push(Rc::new(Sphere::new(Vec3(4.0, 1.0, 0.0), 1.0, mat_ptr)));
 
     let scene = Rc::new(BvhNode::new(scene, 0.0, 1.0));
 
     vec![scene]
+}
+
+pub fn two_perlin_spheres() -> HittableList {
+    let mut objects = HittableList::new();
+
+    let pertext = Rc::new(NoiseTexture::new(4.0));
+
+    objects.push(Rc::new(Sphere::new(
+        Vec3(0.0, -1000.0, 0.0),
+        1000.0,
+        Rc::new(Lambertian::new(pertext.clone())),
+    )));
+    
+    objects.push(Rc::new(Sphere::new(
+        Vec3(0.0, 2.0, 0.0),
+        2.0,
+        Rc::new(Lambertian::new(pertext)),
+    )));
+
+    objects
 }

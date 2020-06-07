@@ -18,9 +18,9 @@ pub struct Camera {
 impl Default for Camera {
     fn default() -> Self {
         Camera::new(
-            Vec3::new(0.0, 0.0, 0.0),
-            Vec3::new(0.0, 0.0, -1.0),
-            Vec3::new(0.0, 1.0, 0.0),
+            Vec3(0.0, 0.0, 0.0),
+            Vec3(0.0, 0.0, -1.0),
+            Vec3(0.0, 1.0, 0.0),
             90.0,
             16.0 / 9.0,
             2.0,

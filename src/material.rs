@@ -3,7 +3,10 @@ use std::rc::Rc;
 use crate::hittable::HitRecord;
 use crate::ray::Ray;
 use crate::vec3::{refract, Vec3};
-use crate::{texture::{SolidColor, Texture, CheckerTexture}, clamp};
+use crate::{
+    clamp,
+    texture::{CheckerTexture, SolidColor, Texture},
+};
 
 fn schlick(cosine: f64, ref_ind: f64) -> f64 {
     let r0 = (1.0 - ref_ind) / (1.0 + ref_ind);
@@ -48,10 +51,10 @@ impl Material for Lambertian {
 
 impl From<(f64, f64, f64)> for Lambertian {
     fn from((x, y, z): (f64, f64, f64)) -> Self {
-        let color = Vec3::new(x, y, z);
+        let color = Vec3(x, y, z);
         let texture = SolidColor::new(color);
         Self {
-            albedo: Rc::new(texture)
+            albedo: Rc::new(texture),
         }
     }
 }
@@ -66,10 +69,9 @@ impl From<(Vec3, Vec3)> for Lambertian {
     fn from((color1, color2): (Vec3, Vec3)) -> Self {
         let texture = CheckerTexture::new(color1, color2);
         Self {
-            albedo: Rc::new(texture)
+            albedo: Rc::new(texture),
         }
     }
-    
 }
 
 pub struct Metal {
@@ -123,7 +125,7 @@ impl Material for Dielectric {
         attenuation: &mut Vec3,
         scattered: &mut Ray,
     ) -> bool {
-        *attenuation = Vec3::new(1.0, 1.0, 1.0);
+        *attenuation = Vec3(1.0, 1.0, 1.0);
         let etai_over_etat = if record.front_face {
             1.0 / self.ref_idx
         } else {

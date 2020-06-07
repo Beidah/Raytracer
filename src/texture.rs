@@ -1,4 +1,7 @@
-use crate::vec3::{Color, Vec3};
+use crate::{
+    noise::Perlin,
+    vec3::{Color, Vec3},
+};
 use std::rc::Rc;
 
 pub trait Texture {
@@ -6,7 +9,7 @@ pub trait Texture {
 }
 
 pub struct SolidColor {
-    color: Color
+    color: Color,
 }
 
 impl SolidColor {
@@ -46,6 +49,47 @@ impl Texture for CheckerTexture {
             self.even.value(u, v, p)
         }
     }
-    
 }
 
+pub struct NoiseTexture {
+    noise: Perlin,
+    scale: f64,
+    color: Color,
+}
+
+impl NoiseTexture {
+    pub fn new(scale: f64) -> Self {
+        NoiseTexture {
+            scale,
+            ..Self::default()
+        }
+    }
+
+    pub fn with_color(scale: f64, color: Color) -> Self {
+        NoiseTexture {
+            scale,
+            color,
+            ..Self::default()
+        }
+    }
+
+    pub fn set_scale(&mut self, scale: f64) {
+        self.scale = scale;
+    }
+}
+
+impl Texture for NoiseTexture {
+    fn value(&self, _u: f64, _v: f64, p: Vec3) -> Color {
+        return self.color * (self.scale * p.z() + 10.0 * self.noise.turb(p)).sin().abs();
+    }
+}
+
+impl Default for NoiseTexture {
+    fn default() -> Self {
+        NoiseTexture {
+            scale: 1.0,
+            color: Vec3(1.0, 1.0, 1.0),
+            noise: Default::default(),
+        }
+    }
+}

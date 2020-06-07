@@ -6,7 +6,7 @@ use crate::*;
 pub type Color = Vec3;
 
 #[derive(Clone, Copy, Debug, Default)]
-pub struct Vec3(f64, f64, f64);
+pub struct Vec3(pub f64, pub f64, pub f64);
 
 impl Vec3 {
     pub fn new(x: f64, y: f64, z: f64) -> Self {
@@ -44,7 +44,7 @@ impl Vec3 {
 
     pub fn rand_in_unit_disk() -> Self {
         loop {
-            let p = Vec3::new(rand_with_range(-1.0, 1.0), rand_with_range(-1.0, 1.0), 0.0);
+            let p = Vec3(rand_with_range(-1.0, 1.0), rand_with_range(-1.0, 1.0), 0.0);
             if p.length_squared() >= 1.0 {
                 continue;
             }

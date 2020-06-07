@@ -60,8 +60,8 @@ impl Hittable for Sphere {
 
     fn bounding_box(&self, _t0: f64, _t1: f64) -> Option<Aabb> {
         let output_box = Aabb::new(
-            self.center - Vec3::new(self.radius, self.radius, self.radius),
-            self.center + Vec3::new(self.radius, self.radius, self.radius),
+            self.center - Vec3(self.radius, self.radius, self.radius),
+            self.center + Vec3(self.radius, self.radius, self.radius),
         );
         Some(output_box)
     }

@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use super::{aabb::Aabb, HitRecord, Hittable, sphere::get_sphere_uv};
+use super::{aabb::Aabb, sphere::get_sphere_uv, HitRecord, Hittable};
 use crate::vec3::Vec3;
 use crate::{material::Material, ray::Ray};
 
@@ -77,13 +77,13 @@ impl Hittable for MovableSphere {
 
     fn bounding_box(&self, t0: f64, t1: f64) -> Option<Aabb> {
         let box0 = Aabb::new(
-            self.center(t0) - Vec3::new(self.radius, self.radius, self.radius),
-            self.center(t0) + Vec3::new(self.radius, self.radius, self.radius),
+            self.center(t0) - Vec3(self.radius, self.radius, self.radius),
+            self.center(t0) + Vec3(self.radius, self.radius, self.radius),
         );
 
         let box1 = Aabb::new(
-            self.center(t1) - Vec3::new(self.radius, self.radius, self.radius),
-            self.center(t1) + Vec3::new(self.radius, self.radius, self.radius),
+            self.center(t1) - Vec3(self.radius, self.radius, self.radius),
+            self.center(t1) + Vec3(self.radius, self.radius, self.radius),
         );
 
         let output_box = Aabb::surrounding_box(box0, box1);

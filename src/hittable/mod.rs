@@ -42,8 +42,10 @@ impl HitRecord {
         };
 
         HitRecord {
-            p, t,
-            u, v,
+            p,
+            t,
+            u,
+            v,
             normal,
             front_face,
             mat_ptr: Rc::clone(mat_ptr),

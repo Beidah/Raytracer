@@ -15,13 +15,13 @@ impl Aabb {
     }
 
     pub fn surrounding_box(box0: Self, box1: Self) -> Self {
-        let min = Vec3::new(
+        let min = Vec3(
             f64::min(box0.min().x(), box1.min().x()),
             f64::min(box0.min().y(), box1.min().y()),
             f64::min(box0.min().z(), box1.min().z()),
         );
 
-        let max = Vec3::new(
+        let max = Vec3(
             f64::max(box0.max().x(), box1.max().x()),
             f64::max(box0.max().y(), box1.max().y()),
             f64::max(box0.max().z(), box1.max().z()),

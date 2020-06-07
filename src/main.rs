@@ -1,5 +1,5 @@
 use camera::Camera;
-use hittable::{Hittable, HittableList};
+use hittable::Hittable;
 use ray::Ray;
 use raytracer::*;
 use vec3::Vec3;
@@ -55,7 +55,8 @@ fn main() {
     println!("{} {}", image_width, image_height);
     println!("255");
 
-    let world: HittableList = random_scene();
+    // let world: HittableList = random_scene();
+    let world = two_perlin_spheres();
 
     let lookfrom = Vec3::new(13.0, 2.0, 3.0);
     let lookat = Vec3::new(0.0, 0.0, 0.0);
