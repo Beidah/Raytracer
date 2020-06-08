@@ -1,8 +1,10 @@
 use crate::{
+    clamp,
     noise::Perlin,
     vec3::{Color, Vec3},
 };
-use std::rc::Rc;
+use image::{DynamicImage, GenericImageView};
+use std::{path::Path, rc::Rc};
 
 pub trait Texture {
     fn value(&self, u: f64, v: f64, p: Vec3) -> Color;
@@ -91,5 +93,38 @@ impl Default for NoiseTexture {
             color: Vec3(1.0, 1.0, 1.0),
             noise: Default::default(),
         }
+    }
+}
+
+pub struct ImageTexture {
+    image: DynamicImage,
+}
+
+impl ImageTexture {
+    pub fn new<P: AsRef<Path>>(path: P) -> Self {
+        let image = image::open(path).unwrap();
+        Self { image }
+    }
+}
+
+impl Texture for ImageTexture {
+    fn value(&self, u: f64, v: f64, _p: Vec3) -> Color {
+        let color_scale: f64 = 1.0 / 255.0;
+
+        let u = clamp(u, 0.0, 1.0);
+        let v = 1.0 - clamp(v, 0.0, 1.0);
+
+        let (width, height) = self.image.dimensions();
+
+        let x = (u * width as f64) as u32;
+        let y = (v * height as f64) as u32;
+
+        let pixel = self.image.get_pixel(x, y);
+
+        let r = pixel[0] as f64 * color_scale;
+        let g = pixel[1] as f64 * color_scale;
+        let b = pixel[2] as f64 * color_scale;
+
+        Vec3(r, g, b)
     }
 }

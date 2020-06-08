@@ -107,7 +107,7 @@ pub fn two_perlin_spheres() -> HittableList {
         1000.0,
         Rc::new(Lambertian::new(pertext.clone())),
     )));
-    
+
     objects.push(Rc::new(Sphere::new(
         Vec3(0.0, 2.0, 0.0),
         2.0,
@@ -115,4 +115,13 @@ pub fn two_perlin_spheres() -> HittableList {
     )));
 
     objects
+}
+
+pub fn earth() -> HittableList {
+    let earth_texture = Rc::new(Lambertian::from(
+        "F:\\workspace\\rust\\raytracer\\res\\earthmap.jpg",
+    ));
+    let globe = Rc::new(Sphere::new(Vec3(0.0, 0.0, 0.0), 2.0, earth_texture));
+
+    vec![globe]
 }

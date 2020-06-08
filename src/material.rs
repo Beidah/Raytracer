@@ -5,7 +5,7 @@ use crate::ray::Ray;
 use crate::vec3::{refract, Vec3};
 use crate::{
     clamp,
-    texture::{CheckerTexture, SolidColor, Texture},
+    texture::{CheckerTexture, ImageTexture, SolidColor, Texture},
 };
 
 fn schlick(cosine: f64, ref_ind: f64) -> f64 {
@@ -62,6 +62,15 @@ impl From<(f64, f64, f64)> for Lambertian {
 impl From<Vec3> for Lambertian {
     fn from(color: Vec3) -> Self {
         Self::from((color.x(), color.y(), color.z()))
+    }
+}
+
+impl From<&str> for Lambertian {
+    fn from(path: &str) -> Self {
+        let texture = ImageTexture::new(path);
+        Self {
+            albedo: Rc::new(texture),
+        }
     }
 }
 

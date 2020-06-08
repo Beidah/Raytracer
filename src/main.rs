@@ -53,7 +53,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let max_depth = 30;
 
     // let world: HittableList = random_scene();
-    let world = random_scene();
+    let world = earth();
 
     let lookfrom = Vec3::new(13.0, 2.0, 3.0);
     let lookat = Vec3::new(0.0, 0.0, 0.0);
@@ -85,7 +85,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         let (r, g, b) = write_color(pixel_color, samples_per_pixel);
         image::Rgb([r, g, b])
     });
-    
+
     // for j in 0..image_height {
     //     println!("\rScanlines remaining: {} ", image_height - j);
     //     for i in 0..image_width {
