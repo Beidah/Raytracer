@@ -109,8 +109,6 @@ impl ImageTexture {
 
 impl Texture for ImageTexture {
     fn value(&self, u: f64, v: f64, _p: Vec3) -> Color {
-        let color_scale: f64 = 1.0 / 255.0;
-
         let u = clamp(u, 0.0, 1.0);
         let v = 1.0 - clamp(v, 0.0, 1.0);
 
@@ -121,10 +119,6 @@ impl Texture for ImageTexture {
 
         let pixel = self.image.get_pixel(x, y);
 
-        let r = pixel[0] as f64 * color_scale;
-        let g = pixel[1] as f64 * color_scale;
-        let b = pixel[2] as f64 * color_scale;
-
-        Vec3(r, g, b)
+        Vec3::from(pixel)
     }
 }

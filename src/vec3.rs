@@ -2,6 +2,7 @@ use std::fmt;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 use crate::*;
+use image::{Rgb, Rgba};
 
 pub type Color = Vec3;
 
@@ -99,6 +100,30 @@ impl Vec3 {
 
     pub fn unit_vector(v: Vec3) -> Self {
         v / v.length()
+    }
+}
+
+impl From<(u8, u8, u8)> for Vec3 {
+    fn from((r, g, b): (u8, u8, u8)) -> Self {
+        let color_scale = 1.0 / 255.0;
+
+        let r = r as f64 * color_scale;
+        let g = g as f64 * color_scale;
+        let b = b as f64 * color_scale;
+
+        Vec3(r, g, b)
+    }
+}
+
+impl From<Rgba<u8>> for Vec3 {
+    fn from(pixel: Rgba<u8>) -> Self {
+        Vec3::from((pixel[0], pixel[1], pixel[2]))
+    }
+}
+
+impl From<Rgb<u8>> for Vec3 {
+    fn from(pixel: Rgb<u8>) -> Self {
+        Vec3::from((pixel[0], pixel[1], pixel[2]))
     }
 }
 
