@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::hittable::HitRecord;
 use crate::ray::Ray;
-use crate::vec3::{refract, Vec3};
+use crate::vec3::{refract, Vec3, Color};
 use crate::{
     clamp,
     texture::{CheckerTexture, ImageTexture, SolidColor, Texture},
@@ -22,6 +22,10 @@ pub trait Material {
         attenuation: &mut Vec3,
         scattered: &mut Ray,
     ) -> bool;
+
+    fn emitted(&self, _u: f64, _v: f64, _p: Vec3) -> Color {
+        Vec3(0.0, 0.0, 0.0)
+    }
 }
 
 pub struct Lambertian {
@@ -161,5 +165,41 @@ impl Material for Dielectric {
         let refracted = refract(unit_direction, record.normal, etai_over_etat);
         *scattered = Ray::new(record.p, refracted, ray_in.time());
         true
+    }
+}
+
+pub struct DiffuseLight {
+    emit: Rc<dyn Texture>
+}
+
+impl Material for DiffuseLight {
+    fn scatter(
+        &self,
+        _ray_in: &Ray,
+        _record: &HitRecord,
+        _attenuation: &mut Vec3,
+        _scattered: &mut Ray,
+    ) -> bool {
+        false
+    }
+    
+    fn emitted(&self, u: f64, v: f64, p: Vec3) -> Color {
+        self.emit.value(u, v, p)
+    }
+}
+
+impl From<(f64, f64, f64)> for DiffuseLight {
+    fn from((x, y, z): (f64, f64, f64)) -> Self {
+        let color = Vec3(x, y, z);
+        let texture = SolidColor::new(color);
+        Self {
+            emit: Rc::new(texture),
+        }
+    }
+}
+
+impl From<Vec3> for DiffuseLight {
+    fn from(color: Vec3) -> Self {
+        Self::from((color.x(), color.y(), color.z()))
     }
 }

@@ -4,7 +4,7 @@ use camera::Camera;
 use hittable::Hittable;
 use ray::Ray;
 use raytracer::*;
-use vec3::Vec3;
+use vec3::{Color, Vec3};
 
 fn write_color(color: Vec3, samples_per_pixel: i32) -> (u8, u8, u8) {
     let mut r = color.x();
@@ -23,7 +23,7 @@ fn write_color(color: Vec3, samples_per_pixel: i32) -> (u8, u8, u8) {
     )
 }
 
-fn ray_color<T: Hittable>(ray: Ray, world: &T, depth: i32) -> Vec3 {
+fn ray_color<T: Hittable>(ray: Ray, background: Color, world: &T, depth: i32) -> Vec3 {
     if depth <= 0 {
         return Vec3::new(0.0, 0.0, 0.0);
     }
@@ -31,18 +31,19 @@ fn ray_color<T: Hittable>(ray: Ray, world: &T, depth: i32) -> Vec3 {
     if let Some(record) = world.hit(ray, 0.001, f64::MAX) {
         let mut scattered = Default::default();
         let mut attenuation = Default::default();
+        let emitted = record.mat_ptr.emitted(record.u, record.v, record.p);
 
         if record
             .mat_ptr
             .scatter(&ray, &record, &mut attenuation, &mut scattered)
         {
-            return attenuation * ray_color(scattered, world, depth - 1);
+            return emitted + attenuation * ray_color(scattered, background, world, depth - 1);
+        } else {
+            return emitted;
         }
     }
 
-    let unit_direction = Vec3::unit_vector(ray.direction());
-    let t = 0.5 * (unit_direction.y() + 1.0);
-    (1.0 - t) * Vec3::new(1.0, 1.0, 1.0) + t * Vec3::new(0.5, 0.7, 1.0)
+    background
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -53,10 +54,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     let max_depth = 30;
 
     // let world: HittableList = random_scene();
-    let world = earth();
+    let world = simple_light();
 
-    let lookfrom = Vec3::new(13.0, 2.0, 3.0);
-    let lookat = Vec3::new(0.0, 0.0, 0.0);
+    let lookfrom = Vec3::new(26.0, 3.0, 6.0);
+    let lookat = Vec3::new(0.0, 2.0, 0.0);
     let vup = Vec3::new(0.0, 1.0, 0.0);
     let focus_dist = 10.0;
     let aperature = 0.1;
@@ -65,7 +66,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         lookfrom,
         lookat,
         vup,
-        20.0,
+        40.0,
         aspect_ratio,
         aperature,
         focus_dist,
@@ -73,14 +74,20 @@ fn main() -> Result<(), Box<dyn Error>> {
         1.0,
     );
 
+    let mut last_y = 0;
     let image_buffer = image::ImageBuffer::from_fn(image_width, image_height, |x, y| {
+        if y > last_y {
+            last_y = y;
+            println!("Scanline {} done!", last_y);
+        }
+
         let mut pixel_color = Vec3::default();
         for _ in 0..samples_per_pixel {
             let u = (x as f64 + random_double()) / (image_width as f64 - 1.0);
             let v = 1.0 - (y as f64 + random_double()) / (image_height as f64 - 1.0);
 
             let ray = camera.get_ray(u, v);
-            pixel_color += ray_color(ray, &world, max_depth);
+            pixel_color += ray_color(ray, Vec3(0.0, 0.0, 0.0), &world, max_depth);
         }
         let (r, g, b) = write_color(pixel_color, samples_per_pixel);
         image::Rgb([r, g, b])

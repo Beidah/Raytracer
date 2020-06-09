@@ -8,6 +8,7 @@ pub mod aabb;
 pub mod bvh_node;
 pub mod movable_sphere;
 pub mod sphere;
+pub mod rectangle;
 
 use aabb::Aabb;
 pub use movable_sphere::MovableSphere;

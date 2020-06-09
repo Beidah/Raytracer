@@ -3,7 +3,7 @@ pub use std::f64::consts::PI;
 use rand::prelude::*;
 use std::rc::Rc;
 
-use hittable::{bvh_node::BvhNode, HittableList, Sphere};
+use hittable::{bvh_node::BvhNode, HittableList, Sphere, rectangle::XYRect};
 use material::*;
 use texture::NoiseTexture;
 use vec3::Vec3;
@@ -124,4 +124,38 @@ pub fn earth() -> HittableList {
     let globe = Rc::new(Sphere::new(Vec3(0.0, 0.0, 0.0), 2.0, earth_texture));
 
     vec![globe]
+}
+
+pub fn simple_light() -> HittableList {
+    let mut objects = HittableList::new();
+
+    let pertext = Rc::new(NoiseTexture::new(4.0));
+
+    objects.push(Rc::new(Sphere::new(
+        Vec3(0.0, -1000.0, 0.0),
+        1000.0,
+        Rc::new(Lambertian::new(pertext.clone())),
+    )));
+
+    objects.push(Rc::new(Sphere::new(
+        Vec3(0.0, 2.0, 0.0),
+        2.0,
+        Rc::new(Lambertian::new(pertext)),
+    )));
+
+    let diffuse_light = Rc::new(DiffuseLight::from((4.0, 4.0, 4.0)));
+
+    objects.push(Rc::new(Sphere::new(
+        Vec3(0.0, 7.0, 0.0),
+        2.0,
+        diffuse_light.clone(),
+    )));
+
+    objects.push(Rc::new(XYRect::new(
+        3.0, 5.0,
+        1.0, 3.0, -2.0,
+        diffuse_light
+    )));
+
+    objects
 }
